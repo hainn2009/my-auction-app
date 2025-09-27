@@ -1,25 +1,69 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { SignUpDto } from './dto/signup.dto';
+import { GeoLocationService } from './utils/geo-location.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly geoLocationService: GeoLocationService,
+  ) {}
 
-  @Post("/signup")
-  signup(@Body() signUpDto: SignUpDto) {
-    return this.authService.signup(signUpDto);
+  @Post('/signup')
+  @HttpCode(HttpStatus.CREATED)
+  async signup(@Body() signUpDto: SignUpDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    try {
+      const ip = this.geoLocationService.getClientIp(req);
+      const userAgent = req.headers['user-agent'];
+      const location = await this.geoLocationService.getLocationFromIp(ip);
+
+      const token = await this.authService.signup({ ...signUpDto, ip, userAgent, location });
+
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return { message: 'User registered successfully' };
+    } catch (err) {
+      throw new BadRequestException(err.message || 'Signup failed');
+    }
   }
 
-  @Post("/login")
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  @Post('/login')
+  async login(@Body() loginDto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    try {
+      // Getting user geo location
+      const ip = this.geoLocationService.getClientIp(req);
+      const userAgent = req.headers['user-agent'];
+      const location = await this.geoLocationService.getLocationFromIp(ip);
+
+      const token = await this.authService.login({ ...loginDto, ip, userAgent, location });
+
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return { message: 'Login Successful' };
+    } catch (err) {
+      throw new BadRequestException(err.message || 'Login failed');
+    }
   }
 
   @Post('/logout')
-  // TODO: need to work
-  logout(@Param('userId') userId: string) {
-    return this.authService.logout({ userId });
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('auth_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+    return { message: 'Logged out successfully' };
   }
 }
