@@ -10,13 +10,13 @@
   "monorepo": true,
   "root": "apps/api-gateway",
   "projects": {
-    "auction": {
+    "auctions": {
       "type": "application",
-      "root": "apps/auction",
+      "root": "apps/auctions",
       "entryFile": "main",
-      "sourceRoot": "apps/auction/src",
+      "sourceRoot": "apps/auctions/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/auction/tsconfig.app.json"
+        "tsConfigPath": "apps/auctions/tsconfig.app.json"
       }
     },
     "books": {
