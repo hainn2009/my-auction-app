@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuctionController } from './auction.controller';
-import { AuctionService } from './auction.service';
+import { AuctionAppController } from './auction-app.controller';
+import { AuctionAppService } from './auction-app.service';
 
 describe('AuctionController', () => {
-  let auctionController: AuctionController;
+  let auctionController: AuctionAppController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      controllers: [AuctionController],
-      providers: [AuctionService],
+      controllers: [AuctionAppController],
+      providers: [AuctionAppService],
     }).compile();
 
-    auctionController = app.get<AuctionController>(AuctionController);
+    auctionController = app.get<AuctionAppController>(AuctionAppController);
   });
 
   describe('root', () => {
