@@ -1,9 +1,8 @@
-import { AUTH_PATTERN, SignUpDto } from '@app/contracts';
+import { AUTH_PATTERN, LoginDto, SignUpDto } from '@app/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { USERS_CLIENT } from '../constant';
-import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
