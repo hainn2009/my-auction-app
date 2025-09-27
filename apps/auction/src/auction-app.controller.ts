@@ -5,8 +5,8 @@ import { AuctionAppService } from './auction-app.service';
 export class AuctionAppController {
   constructor(private readonly auctionService: AuctionAppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.auctionService.getHello();
+  @Get('/health')
+  getHealth(): string {
+    return this.auctionService.getHealth();
   }
 }
