@@ -15,8 +15,8 @@ describe('AuctionController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(auctionController.getHello()).toBe('Hello World!');
+    it('should return "App is running!"', () => {
+      expect(auctionController.getHealth()).toBe('App is running!');
     });
   });
 });
