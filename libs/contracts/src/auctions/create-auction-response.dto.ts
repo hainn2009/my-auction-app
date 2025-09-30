@@ -1,10 +1,9 @@
-export class CreateAuctionDto {
+export class CreateAuctionResponseDto {
+  id: string;
   itemName: string;
   startingPrice: number;
   itemDescription: string;
   itemCategory: string;
   itemStartDate: Date;
   itemEndDate: Date;
-  userId: string;
-  file: Express.Multer.File;
 }

@@ -1,23 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuctionDto } from './dto/create-auction.dto';
-import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { AUCTIONS_PATTERN, CreateAuctionDto, CreateAuctionResponseDto, UpdateAuctionDto } from '@app/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { AUCTIONS_CLIENT } from '../constant';
 
 @Injectable()
 export class AuctionsService {
+  constructor(@Inject(AUCTIONS_CLIENT) private readonly auctionsClient: ClientProxy) {}
   create(createAuctionDto: CreateAuctionDto) {
-    return 'This action adds a new auction';
+    return firstValueFrom(
+      this.auctionsClient.send<CreateAuctionResponseDto>(AUCTIONS_PATTERN.AUCTIONS.CREATE, createAuctionDto),
+    );
   }
 
   findAll() {
-    return `This action returns all auctions`;
+    return firstValueFrom(this.auctionsClient.send<CreateAuctionResponseDto>(AUCTIONS_PATTERN.AUCTIONS.FIND_ALL, {}));
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auction`;
+  findOne(id: string) {
+    return firstValueFrom(this.auctionsClient.send<CreateAuctionResponseDto>(AUCTIONS_PATTERN.AUCTIONS.FIND_ONE, id));
   }
 
-  update(id: number, updateAuctionDto: UpdateAuctionDto) {
-    return `This action updates a #${id} auction`;
+  update(updateAuctionDto: UpdateAuctionDto) {
+    return `This action updates a auction`;
   }
 
   remove(id: number) {

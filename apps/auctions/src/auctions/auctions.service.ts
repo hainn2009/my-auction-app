@@ -18,6 +18,7 @@ export class AuctionsService {
     itemCategory,
     itemStartDate,
     itemEndDate,
+    userId,
     file,
   }: CreateAuctionDto) {
     let imageUrl = '';
@@ -45,23 +46,23 @@ export class AuctionsService {
       itemPhoto: imageUrl,
       itemStartDate: start,
       itemEndDate: end,
-      seller: req.user.id,
+      seller: userId,
     });
     await newAuction.save();
 
-    return 'This action adds a new auction';
+    return newAuction;
   }
 
   findAll() {
-    return `This action returns all auctions`;
+    return this.productModel.find().exec();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} auction`;
+    return this.productModel.findById(id).exec();
   }
 
-  update(id: number, updateAuctionDto: UpdateAuctionDto) {
-    return `This action updates a #${id} auction`;
+  update(updateAuctionDto: UpdateAuctionDto) {
+    return `This action updates a auction`;
   }
 
   remove(id: number) {

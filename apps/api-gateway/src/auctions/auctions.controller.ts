@@ -35,14 +35,12 @@ export class AuctionsController {
   ) {
     try {
       const { itemName, startingPrice, itemDescription, itemCategory, itemStartDate, itemEndDate } = createAuctionDto;
-      console.log('req.user', req.user);
-      return { message: 'ok' };
 
-      const newAuction = this.auctionsService.create(createAuctionDto);
+      const newAuction = await this.auctionsService.create({ ...createAuctionDto, userId: req.user!.userId, file });
 
       return { message: 'Auction created successfully', newAuction };
     } catch (err) {
-      throw new BadRequestException(err.message || 'Login failed');
+      throw new BadRequestException(err);
     }
   }
 
@@ -53,12 +51,12 @@ export class AuctionsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.auctionsService.findOne(+id);
+    return this.auctionsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAuctionDto: UpdateAuctionDto) {
-    return this.auctionsService.update(+id, updateAuctionDto);
+    return this.auctionsService.update({ id, ...updateAuctionDto });
   }
 
   @Delete(':id')
