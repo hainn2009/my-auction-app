@@ -55,6 +55,11 @@ export class AuctionsController {
     return this.auctionsService.getStats(req.user!.userId);
   }
 
+  @Get('my-auctions')
+  getMyAuctions(@Req() req: Request) {
+    return this.auctionsService.getMyAuctions(req.user!.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.auctionsService.findOne(id);

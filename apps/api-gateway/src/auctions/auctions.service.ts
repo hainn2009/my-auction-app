@@ -38,4 +38,8 @@ export class AuctionsService {
   getStats(userId: string) {
     return this.auctionsClient.send<GetStatsResponseDto>(AUCTIONS_PATTERN.AUCTIONS.STATS, { userId });
   }
+
+  getMyAuctions(userId: string) {
+    return this.auctionsClient.send<any>(AUCTIONS_PATTERN.AUCTIONS.MY_AUCTIONS, { userId });
+  }
 }

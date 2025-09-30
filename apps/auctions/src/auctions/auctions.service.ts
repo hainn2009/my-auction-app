@@ -124,4 +124,24 @@ export class AuctionsService {
 
     return { totalAuctions, userAuctionCount, activeAuctions, latestAuctions, latestUserAuctions };
   }
+
+  async getMyAuctions(userId: string) {
+    const auction = await this.productModel
+      .find({ seller: userId })
+      .populate('seller', 'name')
+      .select('itemName itemDescription currentPrice bids itemEndDate itemCategory itemPhoto seller')
+      .sort({ createdAt: -1 });
+    const formatted = auction.map((auction) => ({
+      _id: auction._id,
+      itemName: auction.itemName,
+      itemDescription: auction.itemDescription,
+      currentPrice: auction.currentPrice,
+      bidsCount: auction.bids.length,
+      timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
+      itemCategory: auction.itemCategory,
+      sellerName: auction.seller.name,
+      itemPhoto: auction.itemPhoto,
+    }));
+    return formatted;
+  }
 }

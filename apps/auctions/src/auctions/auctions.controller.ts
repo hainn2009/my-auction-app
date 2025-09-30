@@ -36,4 +36,9 @@ export class AuctionsController {
   getStats(@Payload() { userId }: GetStatsDto) {
     return this.auctionsService.getStats(userId);
   }
+
+  @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.MY_AUCTIONS)
+  getMyAuctions(@Payload() { userId }: GetStatsDto) {
+    return this.auctionsService.getMyAuctions(userId);
+  }
 }
