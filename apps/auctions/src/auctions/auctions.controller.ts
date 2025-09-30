@@ -1,4 +1,4 @@
-import { AUCTIONS_PATTERN, CreateAuctionDto, UpdateAuctionDto } from '@app/contracts';
+import { AUCTIONS_PATTERN, CreateAuctionDto, GetStatsDto, UpdateAuctionDto } from '@app/contracts';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuctionsService } from './auctions.service';
@@ -30,5 +30,10 @@ export class AuctionsController {
   @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.REMOVE)
   remove(@Payload() id: number) {
     return this.auctionsService.remove(id);
+  }
+
+  @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.STATS)
+  getStats(@Payload() { userId }: GetStatsDto) {
+    return this.auctionsService.getStats(userId);
   }
 }

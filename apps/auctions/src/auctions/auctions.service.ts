@@ -68,4 +68,60 @@ export class AuctionsService {
   remove(id: number) {
     return `This action removes a #${id} auction`;
   }
+
+  async getStats(userId: string) {
+    const dateNow = new Date();
+    const stats = await this.productModel.aggregate([
+      {
+        $facet: {
+          totalAuctions: [{ $count: 'count' }],
+          userAuctionCount: [{ $match: { seller: userId } }, { $count: 'count' }],
+          activeAuctions: [
+            { $match: { itemStartDate: { $lte: dateNow }, itemEndDate: { $gte: dateNow } } },
+            { $count: 'count' },
+          ],
+        },
+      },
+    ]);
+
+    const totalAuctions = stats[0].totalAuctions[0]?.count || 0;
+    const userAuctionCount = stats[0].userAuctionCount[0]?.count || 0;
+    const activeAuctions = stats[0].activeAuctions[0]?.count || 0;
+
+    const globalAuction = await this.productModel
+      .find({ itemEndDate: { $gt: dateNow } })
+      .populate('seller', 'name')
+      .sort({ createdAt: -1 })
+      .limit(3);
+    const latestAuctions = globalAuction.map((auction) => ({
+      _id: auction._id,
+      itemName: auction.itemName,
+      itemDescription: auction.itemDescription,
+      currentPrice: auction.currentPrice,
+      bidsCount: auction.bids.length,
+      timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
+      itemCategory: auction.itemCategory,
+      sellerName: auction.seller.name,
+      itemPhoto: auction.itemPhoto,
+    }));
+
+    const userAuction = await this.productModel
+      .find({ seller: userId })
+      .populate('seller', 'name')
+      .sort({ createdAt: -1 })
+      .limit(3);
+    const latestUserAuctions = userAuction.map((auction) => ({
+      _id: auction._id,
+      itemName: auction.itemName,
+      itemDescription: auction.itemDescription,
+      currentPrice: auction.currentPrice,
+      bidsCount: auction.bids.length,
+      timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
+      itemCategory: auction.itemCategory,
+      sellerName: auction.seller.name,
+      itemPhoto: auction.itemPhoto,
+    }));
+
+    return { totalAuctions, userAuctionCount, activeAuctions, latestAuctions, latestUserAuctions };
+  }
 }

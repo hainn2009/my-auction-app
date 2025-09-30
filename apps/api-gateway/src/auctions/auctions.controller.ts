@@ -49,6 +49,12 @@ export class AuctionsController {
     return this.auctionsService.findAll();
   }
 
+  // Place before @Get(':id') to avoid route conflict
+  @Get('stats')
+  getStats(@Req() req: Request) {
+    return this.auctionsService.getStats(req.user!.userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.auctionsService.findOne(id);

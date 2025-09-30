@@ -1,4 +1,10 @@
-import { AUCTIONS_PATTERN, CreateAuctionDto, CreateAuctionResponseDto, UpdateAuctionDto } from '@app/contracts';
+import {
+  AUCTIONS_PATTERN,
+  CreateAuctionDto,
+  CreateAuctionResponseDto,
+  GetStatsResponseDto,
+  UpdateAuctionDto,
+} from '@app/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
@@ -27,5 +33,9 @@ export class AuctionsService {
 
   remove(id: number) {
     return `This action removes a #${id} auction`;
+  }
+
+  getStats(userId: string) {
+    return this.auctionsClient.send<GetStatsResponseDto>(AUCTIONS_PATTERN.AUCTIONS.STATS, { userId });
   }
 }

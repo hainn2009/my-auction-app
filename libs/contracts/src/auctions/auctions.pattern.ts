@@ -5,6 +5,7 @@ export const AUCTIONS_PATTERN = {
     CREATE: 'auctions.auctions.create',
     UPDATE: 'auctions.auctions.update',
     REMOVE: 'auctions.auctions.remove',
+    STATS: 'auctions.auctions.stats',
   },
   BIDS: {
     FIND_ALL: 'auctions.bids.findAll',
