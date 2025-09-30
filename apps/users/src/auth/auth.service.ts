@@ -1,11 +1,9 @@
-import { LoginDto, SignUpDto } from '@app/contracts';
+import { Login, LoginDocument, LoginDto, SignUpDto, User, UserDocument } from '@app/contracts';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Login, LoginDocument } from '../schemas/Login.schema';
-import { User, UserDocument } from '../schemas/users.schema';
 import { PasswordService } from './password.service';
 
 @Injectable()

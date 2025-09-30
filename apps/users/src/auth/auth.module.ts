@@ -1,9 +1,8 @@
+import { Login, LoginSchema, User, UserSchema } from '@app/contracts';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Login, LoginSchema } from '../schemas/Login.schema';
-import { User, UserSchema } from '../schemas/users.schema';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PasswordService } from './password.service';

@@ -6,6 +6,7 @@ import { ApiGatewayService } from './api-gateway.service';
 import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
 import { UsersModule } from './users/users.module';
+import { AuctionsModule } from './auctions/auctions.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersModule } from './users/users.module';
         MONGODB_URI: joi.string().required(),
       }),
     }),
+    AuctionsModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

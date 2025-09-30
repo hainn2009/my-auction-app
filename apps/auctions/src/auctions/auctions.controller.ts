@@ -1,7 +1,6 @@
+import { CreateAuctionDto, UpdateAuctionDto } from '@app/contracts';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CreateAuctionDto } from '../../../../libs/contracts/src/auctions/create-auction.dto';
-import { UpdateAuctionDto } from '../../../../libs/contracts/src/auctions/update-auction.dto';
 import { AuctionsService } from './auctions.service';
 
 @Controller()
