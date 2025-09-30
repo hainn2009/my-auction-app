@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as joi from 'joi';
-import { AuthModule } from './auth/auth.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,4 +29,4 @@ import { UsersService } from './users.service';
   controllers: [UsersController],
   providers: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

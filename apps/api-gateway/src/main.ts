@@ -2,9 +2,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ApiGatewayModule } from './api-gateway.module';
 import { TrimStringsPipe } from './common/trim-strings.pipe';
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
+  app.use(cookieParser());
   app.useGlobalPipes(
     new TrimStringsPipe(),
     new ValidationPipe({

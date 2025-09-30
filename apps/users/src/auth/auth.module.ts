@@ -9,16 +9,6 @@ import { PasswordService } from './password.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      {
-        name: Login.name,
-        schema: LoginSchema,
-      },
-      {
-        name: User.name,
-        schema: UserSchema,
-      },
-    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -29,6 +19,16 @@ import { PasswordService } from './password.service';
         },
       }),
     }),
+    MongooseModule.forFeature([
+      {
+        name: Login.name,
+        schema: LoginSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, PasswordService],
