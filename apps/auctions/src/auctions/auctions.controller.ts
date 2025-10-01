@@ -1,4 +1,5 @@
 import { AUCTIONS_PATTERN, CreateAuctionDto, GetStatsDto, UpdateAuctionDto } from '@app/contracts';
+import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuctionsService } from './auctions.service';
@@ -40,5 +41,10 @@ export class AuctionsController {
   @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.MY_AUCTIONS)
   getMyAuctions(@Payload() { userId }: GetStatsDto) {
     return this.auctionsService.getMyAuctions(userId);
+  }
+
+  @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID)
+  placeBId(@Payload() placeBidDto: PlaceBidDto) {
+    return this.auctionsService.placeBid(placeBidDto);
   }
 }

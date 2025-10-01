@@ -5,6 +5,7 @@ import {
   GetStatsResponseDto,
   UpdateAuctionDto,
 } from '@app/contracts';
+import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
@@ -25,6 +26,10 @@ export class AuctionsService {
 
   findOne(id: string) {
     return firstValueFrom(this.auctionsClient.send<CreateAuctionResponseDto>(AUCTIONS_PATTERN.AUCTIONS.FIND_ONE, id));
+  }
+
+  placeBid(placeBidDto: PlaceBidDto) {
+    return firstValueFrom(this.auctionsClient.send<string>(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID, placeBidDto));
   }
 
   update(updateAuctionDto: UpdateAuctionDto) {

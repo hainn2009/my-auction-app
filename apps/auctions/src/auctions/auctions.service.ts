@@ -1,8 +1,9 @@
-import { CreateAuctionDto, Product, ProductDocument, UpdateAuctionDto } from '@app/contracts';
-import { Injectable } from '@nestjs/common';
+import { CreateAuctionDto, isUser, Product, ProductDocument, UpdateAuctionDto } from '@app/contracts';
+import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CloudinaryService } from './cloudinary.service';
 
 @Injectable()
@@ -101,7 +102,7 @@ export class AuctionsService {
       bidsCount: auction.bids.length,
       timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
       itemCategory: auction.itemCategory,
-      sellerName: auction.seller.name,
+      sellerName: isUser(auction.seller) ? auction.seller.name : null,
       itemPhoto: auction.itemPhoto,
     }));
 
@@ -118,7 +119,7 @@ export class AuctionsService {
       bidsCount: auction.bids.length,
       timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
       itemCategory: auction.itemCategory,
-      sellerName: auction.seller.name,
+      sellerName: isUser(auction.seller) ? auction.seller.name : null,
       itemPhoto: auction.itemPhoto,
     }));
 
@@ -139,9 +140,29 @@ export class AuctionsService {
       bidsCount: auction.bids.length,
       timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
       itemCategory: auction.itemCategory,
-      sellerName: auction.seller.name,
+      sellerName: isUser(auction.seller) ? auction.seller.name : null,
       itemPhoto: auction.itemPhoto,
     }));
     return formatted;
+  }
+
+  async placeBid({ userId, auctionId: id, bidAmount }: PlaceBidDto) {
+    const product = await this.productModel.findById(id).populate('bids.bidder', 'name');
+    if (!product) throw new NotFoundException('Auction not found');
+
+    if (new Date(product.itemEndDate) < new Date()) throw new BadRequestException('Auction has already ended');
+
+    const minBid = Math.max(product.currentPrice, product.startingPrice) + 1;
+    const maxBid = Math.max(product.currentPrice, product.startingPrice) + 10;
+    if (bidAmount < minBid) throw new BadRequestException(`Bid must be at least Rs ${minBid}`);
+    if (bidAmount > maxBid) throw new BadRequestException(`Bid must be at max Rs ${maxBid}`);
+    product.bids.push({
+      bidder: new Types.ObjectId(userId),
+      bidAmount: bidAmount,
+    });
+
+    product.currentPrice = bidAmount;
+    await product.save();
+    return 'Bid placed successfully';
   }
 }

@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
 import { AuctionsService } from './auctions.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
+import { PlaceBidDto } from './dto/place-bid.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 
 @Controller('auctions')
@@ -63,6 +64,11 @@ export class AuctionsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.auctionsService.findOne(id);
+  }
+
+  @Post(':id')
+  placeBid(@Param('id') id: string, @Body() { bidAmount }: PlaceBidDto, @Req() req: Request) {
+    return this.auctionsService.placeBid({ userId: req.user!.userId, auctionId: id, bidAmount });
   }
 
   @Patch(':id')

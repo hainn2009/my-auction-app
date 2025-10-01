@@ -1,13 +1,12 @@
 // product.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { User } from './users.schema';
 
 export type BidDocument = HydratedDocument<Bid>;
-@Schema()
+@Schema({ _id: false })
 export class Bid {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  bidder: User; //| Types.ObjectId;
+  bidder: Types.ObjectId;
 
   @Prop({ type: Number, required: true })
   bidAmount: number;
@@ -30,8 +29,8 @@ export class Product {
   @Prop({ required: true })
   itemCategory: string;
 
-  @Prop()
-  itemPhoto?: string;
+  @Prop({ type: String, default: '' })
+  itemPhoto: string;
 
   @Prop({ required: true })
   startingPrice: number;
@@ -46,13 +45,13 @@ export class Product {
   itemEndDate: Date;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  seller: User; //| Types.ObjectId;
+  seller: Types.ObjectId;
 
   @Prop({ type: [BidSchema], default: [] })
   bids: Bid[];
 
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
-  winner: User | null; //| Types.ObjectId ;
+  winner: Types.ObjectId;
 
   @Prop({ default: false })
   isSold: boolean;
