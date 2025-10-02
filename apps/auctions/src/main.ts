@@ -7,14 +7,16 @@ async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(AuctionsAppModule);
   const configService = appContext.get(ConfigService);
 
+  const port = configService.get<number>('AUCTIONS_PORT') || 3003;
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AuctionsAppModule, {
     transport: Transport.TCP,
     options: {
-      port: configService.get<number>('AUCTIONS_CLIENT_PORT') || 3003,
+      port,
     },
   });
 
   await app.listen();
   await appContext.close();
+  console.log(`🚀 Auctions microservice is running on: http://localhost:${port}`);
 }
 bootstrap();
