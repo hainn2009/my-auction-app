@@ -7,18 +7,20 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([{
-      name: USERS_CLIENT,
-      useFactory: (config: ConfigService) => ({
-        transport: Transport.TCP,
-        options: {
-          port: config.get<number>('USERS_CLIENT_PORT'),
-        },
-      }),
-      inject: [ConfigService],
-    }])
+    ClientsModule.registerAsync([
+      {
+        name: USERS_CLIENT,
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            port: config.get<number>('USERS_CLIENT_PORT'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
   ],
   providers: [UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController],
 })
-export class UsersModule { }
+export class UsersModule {}

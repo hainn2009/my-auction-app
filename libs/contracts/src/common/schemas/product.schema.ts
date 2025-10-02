@@ -12,7 +12,7 @@ export class Bid {
   bidAmount: number;
 
   @Prop({ type: Date, default: Date.now })
-  bidTime: Date;
+  bidTime?: Date;
 }
 
 export const BidSchema = SchemaFactory.createForClass(Bid);
