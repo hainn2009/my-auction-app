@@ -33,7 +33,11 @@ export class UsersController {
   }
 
   @Get('logins')
-  getLoginHistory(@Req() req: Request) {
-    return this.usersService.getLoginHistory(req.user!.userId);
+  async getLoginHistory(@Req() req: Request) {
+    const response = await this.usersService.getLoginHistory(req.user!.userId);
+    if (response.success === false) {
+      throw new BadRequestException(response.error.message);
+    }
+    return response.data;
   }
 }
