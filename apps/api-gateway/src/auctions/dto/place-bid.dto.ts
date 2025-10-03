@@ -1,6 +1,7 @@
-import { IsNumber } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class PlaceBidDto {
-  @IsNumber()
-  bidAmount: number;
+  // TODO: need to update to Number after testing
+  @IsNotEmpty()
+  bidAmount: string;
 }

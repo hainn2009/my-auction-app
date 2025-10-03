@@ -54,19 +54,39 @@ export class AuctionsService {
     return newAuction;
   }
 
-  findAll() {
-    return this.productModel.find().exec();
+  async findAll() {
+    const auction = await this.productModel
+      .find({ itemEndDate: { $gt: new Date() } })
+      .populate('seller', 'name')
+      .select('itemName itemDescription currentPrice bids itemEndDate itemCategory itemPhoto seller')
+      .sort({ createdAt: -1 });
+    const formatted = auction.map((auction) => ({
+      _id: auction._id,
+      itemName: auction.itemName,
+      itemDescription: auction.itemDescription,
+      currentPrice: auction.currentPrice,
+      bidsCount: auction.bids.length,
+      timeLeft: Math.max(0, auction.itemEndDate.getTime() - Date.now()),
+      itemCategory: auction.itemCategory,
+      sellerName: isUser(auction.seller) ? auction.seller.name : null,
+      itemPhoto: auction.itemPhoto,
+    }));
+
+    return formatted;
   }
 
-  findOne(id: number) {
-    return this.productModel.findById(id).exec();
+  async findOne(id: string) {
+    const auction = await this.productModel.findById(id).populate('seller', 'name').populate('bids.bidder', 'name');
+    if (!auction) return { success: false, error: { message: 'Auction not found' } };
+    auction.bids.sort((a, b) => b.bidTime!.getTime() - a.bidTime!.getTime());
+    return auction;
   }
 
   update(updateAuctionDto: UpdateAuctionDto) {
     return `This action updates a auction`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} auction`;
   }
 

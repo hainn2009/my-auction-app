@@ -16,7 +16,7 @@ import { GeoLocationService } from './utils/geo-location.service';
         useFactory: (config: ConfigService) => ({
           transport: Transport.TCP,
           options: {
-            port: config.get<number>('USERS_CLIENT_PORT'),
+            port: config.get<number>('USERS_PORT'),
           },
         }),
         inject: [ConfigService],

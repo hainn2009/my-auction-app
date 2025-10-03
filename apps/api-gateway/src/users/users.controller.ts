@@ -10,8 +10,11 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getCurrentUser(@Req() req: Request) {
-    return this.usersService.findOne({ userId: req.user!.userId });
+  async getCurrentUser(@Req() req: Request) {
+    const user = await this.usersService.findOne({ userId: req.user!.userId });
+    return {
+      user,
+    };
   }
 
   @Patch()

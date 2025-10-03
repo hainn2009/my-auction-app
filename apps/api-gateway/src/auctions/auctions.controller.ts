@@ -21,7 +21,7 @@ import { CreateAuctionDto } from './dto/create-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 
-@Controller('auctions')
+@Controller('auction')
 @UseGuards(AuthGuard('jwt'))
 export class AuctionsController {
   constructor(private readonly auctionsService: AuctionsService) {}
@@ -63,12 +63,12 @@ export class AuctionsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.auctionsService.findOne(id);
+    return this.auctionsService.findOne({ id });
   }
 
   @Post(':id')
   placeBid(@Param('id') id: string, @Body() { bidAmount }: PlaceBidDto, @Req() req: Request) {
-    return this.auctionsService.placeBid({ userId: req.user!.userId, auctionId: id, bidAmount });
+    return this.auctionsService.placeBid({ userId: req.user!.userId, auctionId: id, bidAmount: Number(bidAmount) });
   }
 
   @Patch(':id')

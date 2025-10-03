@@ -18,7 +18,7 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: joi.object({
-        USERS_CLIENT_PORT: joi.number().default(3001),
+        USERS_PORT: joi.number().default(3001),
         BOOKS_CLIENT_PORT: joi.number().default(3002),
         MONGODB_URI: joi.string().required(),
       }),
