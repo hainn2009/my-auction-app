@@ -21,6 +21,7 @@ WORKDIR /app
 
 # Copy only necessary files
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
 COPY --from=builder /app/dist/apps/users ./dist
 
 EXPOSE 3000
