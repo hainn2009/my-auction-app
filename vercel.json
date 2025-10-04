@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "functions": {
+    "api/api-gateway.js": { "runtime": "nodejs20.x" },
+    "api/auctions.js": { "runtime": "nodejs20.x" },
+    "api/books.js": { "runtime": "nodejs20.x" },
+    "api/users.js": { "runtime": "nodejs20.x" }
+  },
+  "routes": [
+    { "src": "/gateway/(.*)", "dest": "api/api-gateway.js" },
+    { "src": "/auctions/(.*)", "dest": "api/auctions.js" },
+    { "src": "/books/(.*)", "dest": "api/books.js" },
+    { "src": "/users/(.*)", "dest": "api/users.js" }
+  ]
+}
