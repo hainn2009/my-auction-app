@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuctionsController } from './auctions.controller';
 import { AuctionsService } from './auctions.service';
-import { CloudinaryService } from './cloudinary.service';
 
 @Module({
   imports: [
@@ -13,6 +12,6 @@ import { CloudinaryService } from './cloudinary.service';
     ]),
   ],
   controllers: [AuctionsController],
-  providers: [AuctionsService, CloudinaryService],
+  providers: [AuctionsService],
 })
 export class AuctionsModule {}

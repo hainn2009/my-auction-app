@@ -7,6 +7,7 @@ import { ApiGatewayService } from './api-gateway.service';
 import { AuctionsModule } from './auctions/auctions.module';
 import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
+import { CloudinaryModule } from './cloudinary/clouldinary.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -24,6 +25,7 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     AuctionsModule,
+    CloudinaryModule,
   ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],

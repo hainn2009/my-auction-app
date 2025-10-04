@@ -4,14 +4,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { CloudinaryService } from './cloudinary.service';
 
 @Injectable()
 export class AuctionsService {
-  constructor(
-    private readonly cloudinaryService: CloudinaryService,
-    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-  ) {}
+  constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
   async create({
     itemName,
     startingPrice,
@@ -20,18 +16,8 @@ export class AuctionsService {
     itemStartDate,
     itemEndDate,
     userId,
-    file,
+    itemPhotoUrl,
   }: CreateAuctionDto) {
-    let imageUrl = '';
-
-    if (file) {
-      try {
-        imageUrl = await this.cloudinaryService.uploadImage(file);
-      } catch (error) {
-        throw new RpcException({ message: 'Error uploading image to Cloudinary', error: error.message });
-      }
-    }
-
     const start = itemStartDate ? new Date(itemStartDate) : new Date();
     const end = new Date(itemEndDate);
     if (end <= start) {
@@ -44,7 +30,7 @@ export class AuctionsService {
       currentPrice: startingPrice,
       itemDescription,
       itemCategory,
-      itemPhoto: imageUrl,
+      itemPhoto: itemPhotoUrl,
       itemStartDate: start,
       itemEndDate: end,
       seller: userId,

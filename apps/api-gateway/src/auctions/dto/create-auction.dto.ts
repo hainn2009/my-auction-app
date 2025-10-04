@@ -1,9 +1,11 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateAuctionDto {
   @IsNotEmpty()
   itemName: string;
 
+  @Type(() => Number)
   @IsNumber()
   startingPrice: number;
 
@@ -13,9 +15,12 @@ export class CreateAuctionDto {
   @IsNotEmpty()
   itemCategory: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   itemStartDate: Date;
 
-  @IsOptional()
+  @IsNotEmpty()
   itemEndDate: Date;
+
+  @IsOptional()
+  itemPhoto: Express.Multer.File;
 }

@@ -6,5 +6,5 @@ export class CreateAuctionDto {
   itemStartDate: Date;
   itemEndDate: Date;
   userId: string;
-  file: Express.Multer.File;
+  itemPhotoUrl: string;
 }

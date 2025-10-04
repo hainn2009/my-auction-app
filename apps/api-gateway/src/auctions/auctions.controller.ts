@@ -11,15 +11,15 @@ import {
   Res,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request, Response } from 'express';
+import { CloudinaryUpload } from '../cloudinary/cloudinary-upload.decorator';
 import { AuctionsService } from './auctions.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { ImageFilePipe } from './image-file.pipe';
 
 @Controller('auction')
 @UseGuards(AuthGuard('jwt'))
@@ -27,17 +27,19 @@ export class AuctionsController {
   constructor(private readonly auctionsService: AuctionsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @CloudinaryUpload('itemPhoto')
   async create(
     @Body() createAuctionDto: CreateAuctionDto,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(ImageFilePipe) file: Express.Multer.File,
   ) {
     try {
-      const { itemName, startingPrice, itemDescription, itemCategory, itemStartDate, itemEndDate } = createAuctionDto;
-
-      const newAuction = await this.auctionsService.create({ ...createAuctionDto, userId: req.user!.userId, file });
+      const newAuction = await this.auctionsService.create({
+        ...createAuctionDto,
+        userId: req.user!.userId,
+        itemPhotoUrl: file.path,
+      });
 
       return { message: 'Auction created successfully', newAuction };
     } catch (err) {
