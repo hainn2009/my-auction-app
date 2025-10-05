@@ -5,7 +5,7 @@ services:
     env: docker
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/api-gateway/Dockerfile
     envVars:
       - key: FRONTEND_URL
         value: http://localhost:5174
@@ -27,7 +27,7 @@ services:
     rootDir: apps/users
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/users/Dockerfile
     envVars:
       - key: USERS_PORT
         value: 3001
@@ -39,7 +39,7 @@ services:
     rootDir: apps/auctions
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/auctions/Dockerfile
     envVars:
       - key: AUCTIONS_PORT
         value: 3003
