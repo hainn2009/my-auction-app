@@ -22,7 +22,7 @@ services:
         value: 3003
 
   # 👤 Users Service
-  - type: web
+  - type: worker
     name: users
     env: docker
     rootDir: apps/users
@@ -34,7 +34,7 @@ services:
         value: 3001
 
   # 🛒 Auctions Service
-  - type: web
+  - type: worker
     name: auctions
     env: docker
     rootDir: apps/auctions
