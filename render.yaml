@@ -6,6 +6,7 @@ services:
     rootDir: apps/api-gateway
     plan: free
     autoDeploy: true
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: FRONTEND_URL
         value: http://localhost:5174
@@ -19,8 +20,6 @@ services:
         value: auctions
       - key: AUCTIONS_PORT
         value: 3003
-      - key: MONGODB_URI
-        value: mongodb+srv://newuser:talJrKdHqv08tyQ0@cluster0.5imn6.mongodb.net/auctions?retryWrites=true&w=majority&appName=Cluster0
 
   # 👤 Users Service
   - type: web
@@ -29,11 +28,10 @@ services:
     rootDir: apps/users
     plan: free
     autoDeploy: true
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: USERS_PORT
         value: 3001
-      - key: MONGODB_URI
-        value: mongodb+srv://newuser:talJrKdHqv08tyQ0@cluster0.5imn6.mongodb.net/auctions?retryWrites=true&w=majority&appName=Cluster0
 
   # 🛒 Auctions Service
   - type: web
@@ -42,8 +40,7 @@ services:
     rootDir: apps/auctions
     plan: free
     autoDeploy: true
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: AUCTIONS_PORT
         value: 3002
-      - key: MONGODB_URI
-        value: mongodb+srv://newuser:talJrKdHqv08tyQ0@cluster0.5imn6.mongodb.net/auctions?retryWrites=true&w=majority&appName=Cluster0
