@@ -7,6 +7,8 @@ services:
     autoDeploy: true
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_NAME
+        value: api-gateway
       - key: FRONTEND_URL
         value: http://localhost:5174
       - key: GATEWAY_PORT
@@ -29,6 +31,8 @@ services:
     autoDeploy: true
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_NAME
+        value: users
       - key: USERS_PORT
         value: 3001
 
@@ -41,5 +45,7 @@ services:
     autoDeploy: true
     dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_NAME
+        value: auctions
       - key: AUCTIONS_PORT
         value: 3003
