@@ -1,17 +1,28 @@
-# apps/users/Dockerfile
-FROM node:20-alpine
+# ======================
+# 1. Base build stage
+# ======================
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy root package
-COPY ../../package*.json ./
-RUN npm install --only=production
-
-# Copy source của riêng service
+# Copy all source files
 COPY . .
-RUN npm run build
 
-# Expose TCP port
+# Install all deps (including dev)
+RUN npm install
+
+# Build the specific NestJS app
+RUN npm run build auctions
+
+# ======================
+# 2. Runtime stage
+# ======================
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Copy only necessary files
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/dist/apps/auctions ./dist
+
 EXPOSE 3003
-
-# Run compiled code
-CMD ["node", "dist/apps/auctions/main.js"]
+CMD ["node", "dist/main.js"]
