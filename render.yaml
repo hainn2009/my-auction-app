@@ -3,10 +3,9 @@ services:
   - type: web
     name: api-gateway
     env: docker
-    rootDir: apps/api-gateway
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/api-gateway/Dockerfile
     envVars:
       - key: FRONTEND_URL
         value: http://localhost:5174
@@ -28,7 +27,7 @@ services:
     rootDir: apps/users
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/users/Dockerfile
     envVars:
       - key: USERS_PORT
         value: 3001
@@ -40,7 +39,7 @@ services:
     rootDir: apps/auctions
     plan: free
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./apps/auctions/Dockerfile
     envVars:
       - key: AUCTIONS_PORT
-        value: 3002
+        value: 3003
