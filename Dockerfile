@@ -1,12 +1,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy toàn bộ repo (Render sẽ gửi root repo)
 COPY . .
 
 RUN npm install
 
-# Cho phép truyền APP_NAME từ render.yaml
 ARG APP_NAME
 RUN npm run build ${APP_NAME}
 

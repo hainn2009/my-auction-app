@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auctions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auctions
+  template:
+    metadata:
+      labels:
+        app: auctions
+    spec:
+      containers:
+        - name: auctions
+          image: asia-southeast1-docker.pkg.dev/noted-runway-472014-s2/auctions/auctions-service:latest
+          ports:
+            - containerPort: 3003
+          envFrom:
+            - secretRef:
+                name: auctions-secrets

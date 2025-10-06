@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auctions
+spec:
+  selector:
+    app: auctions
+  ports:
+    - port: 3003
+      targetPort: 3003
+  clusterIP: None

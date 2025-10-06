@@ -17,6 +17,7 @@ import { AuctionsService } from './auctions.service';
         useFactory: (config: ConfigService) => ({
           transport: Transport.TCP,
           options: {
+            host: config.get<string>('AUCTIONS_HOST'),
             port: config.get<number>('AUCTIONS_PORT'),
           },
         }),

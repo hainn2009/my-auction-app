@@ -1,0 +1,10 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+
+secretGenerator:
+  - name: users-secrets
+    envs:
+      - secret.env
+generatorOptions:
+  disableNameSuffixHash: true

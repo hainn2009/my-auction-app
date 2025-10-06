@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: asia-southeast1-docker.pkg.dev/noted-runway-472014-s2/auctions/api-gateway:latest
+          ports:
+            - containerPort: 3000
+          # env:
+          #   - name: USERS_HOST
+          #     value: users
+          #   - name: USERS_PORT
+          #     value: '3001'
+          #   - name: AUCTIONS_HOST
+          #     value: auctions
+          #   - name: AUCTIONS_PORT
+          #     value: '3003'
+          envFrom:
+            - secretRef:
+                name: api-gateway-secrets
