@@ -17,6 +17,9 @@ spec:
           image: asia-southeast1-docker.pkg.dev/noted-runway-472014-s2/auctions/users-service:latest
           ports:
             - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              value: 'production'
           envFrom:
             - secretRef:
                 name: users-secrets
