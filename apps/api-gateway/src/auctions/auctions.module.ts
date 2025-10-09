@@ -14,11 +14,19 @@ import { AuctionsService } from './auctions.service';
     ClientsModule.registerAsync([
       {
         name: AUCTIONS_CLIENT,
+        // useFactory: (config: ConfigService) => ({
+        //   transport: Transport.TCP,
+        //   options: {
+        //     host: config.get<string>('AUCTIONS_HOST'),
+        //     port: config.get<number>('AUCTIONS_PORT'),
+        //   },
+        // }),
         useFactory: (config: ConfigService) => ({
-          transport: Transport.TCP,
+          transport: Transport.RMQ,
           options: {
-            host: config.get<string>('AUCTIONS_HOST'),
-            port: config.get<number>('AUCTIONS_PORT'),
+            urls: [config.get<string>('RABBITMQ_URL')!],
+            queue: config.get<string>('RABBITMQ_QUEUE')!,
+            queueOptions: { durable: config.get<string>('RABBITMQ_QUEUE_DURABLE') === 'false' ? false : true },
           },
         }),
         inject: [ConfigService],

@@ -36,6 +36,7 @@
     "test:e2e": "jest --config ./apps/my-book-store/test/jest-e2e.json"
   },
   "dependencies": {
+    "@liaoliaots/nestjs-redis": "^10.0.0",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -46,11 +47,15 @@
     "@nestjs/mongoose": "^11.0.3",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.6",
+    "@nestjs/websockets": "^11.1.6",
+    "amqp-connection-manager": "^5.0.0",
+    "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cloudinary": "^1.21.0",
     "cookie-parser": "^1.4.7",
+    "ioredis": "^5.8.1",
     "joi": "^18.0.1",
     "mongoose": "^8.18.2",
     "multer": "^2.0.2",
@@ -58,7 +63,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

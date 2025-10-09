@@ -1,13 +1,22 @@
 import { CreateAuctionDto, isUser, Product, ProductDocument, UpdateAuctionDto } from '@app/contracts';
 import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { RedisService } from '@liaoliaots/nestjs-redis';
+import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
+import Redis from 'ioredis';
 import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class AuctionsService {
-  constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
+  private redisClient: Redis;
+
+  constructor(
+    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    private readonly redisService: RedisService,
+  ) {
+    this.redisClient = this.redisService.getOrThrow();
+  }
   async create({
     itemName,
     startingPrice,
@@ -154,14 +163,17 @@ export class AuctionsService {
 
   async placeBid({ userId, auctionId: id, bidAmount }: PlaceBidDto) {
     const product = await this.productModel.findById(id).populate('bids.bidder', 'name');
-    if (!product) throw new NotFoundException('Auction not found');
+    if (!product) return { success: false, errorCode: 'NOT_FOUND', message: 'Auction not found' };
 
-    if (new Date(product.itemEndDate) < new Date()) throw new BadRequestException('Auction has already ended');
+    if (new Date(product.itemEndDate) < new Date())
+      return { success: false, errorCode: 'AUCTION_ENDED', message: 'Auction has already ended' };
 
     const minBid = Math.max(product.currentPrice, product.startingPrice) + 1;
     const maxBid = Math.max(product.currentPrice, product.startingPrice) + 10;
-    if (bidAmount < minBid) throw new BadRequestException(`Bid must be at least Rs ${minBid}`);
-    if (bidAmount > maxBid) throw new BadRequestException(`Bid must be at max Rs ${maxBid}`);
+    if (bidAmount < minBid)
+      return { success: false, errorCode: 'BID_TOO_LOW', message: `Bid must be at least Rs ${minBid}` };
+    if (bidAmount > maxBid)
+      return { success: false, errorCode: 'BID_TOO_HIGH', message: `Bid must be at max Rs ${maxBid}` };
     product.bids.push({
       bidder: new Types.ObjectId(userId),
       bidAmount: bidAmount,

@@ -7,18 +7,31 @@ async function bootstrap() {
   const appContext = await NestFactory.createApplicationContext(AuctionsAppModule);
   const configService = appContext.get(ConfigService);
 
-  const port = configService.get<number>('AUCTIONS_PORT') || 3003;
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AuctionsAppModule, {
-    transport: Transport.TCP,
+  // const port = configService.get<number>('AUCTIONS_PORT') || 3003;
+  // const optionTCP = {
+  //   transport: Transport.TCP,
+  //   options: {
+  //     host: '0.0.0.0',
+  //     port,
+  //   },
+  // };
+
+  const RABBITMQ_URL = configService.get<string>('RABBITMQ_URL')!;
+  const RABBITMQ_QUEUE = configService.get<string>('RABBITMQ_QUEUE')!;
+  const RABBITMQ_QUEUE_DURABLE = configService.get<string>('RABBITMQ_QUEUE_DURABLE') === 'false' ? false : true;
+  const optionRMQ: MicroserviceOptions = {
+    transport: Transport.RMQ,
     options: {
-      host: '0.0.0.0',
-      port,
+      urls: [RABBITMQ_URL],
+      queue: RABBITMQ_QUEUE,
+      queueOptions: { durable: RABBITMQ_QUEUE_DURABLE },
     },
-  });
+  };
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AuctionsAppModule, optionRMQ);
 
   await app.listen();
   await appContext.close();
-  console.log(`🚀 Auctions microservice is running on: http://localhost:${port}`);
+  console.log(`🚀 Auctions microservice is running`);
 
   // // --- 2️⃣ Start dummy HTTP server (for Render health check) ---
   // const httpPort = Number(process.env.PORT) || 8080;

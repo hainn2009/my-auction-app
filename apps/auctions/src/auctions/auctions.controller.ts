@@ -1,12 +1,13 @@
 import { AUCTIONS_PATTERN, CreateAuctionDto, GetStatsDto, UpdateAuctionDto } from '@app/contracts';
 import { GetAuctionDto } from '@app/contracts/auctions/get-auction.dto';
 import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuctionsService } from './auctions.service';
 
 @Controller()
 export class AuctionsController {
+  private readonly logger = new Logger(AuctionsController.name);
   constructor(private readonly auctionsService: AuctionsService) {}
 
   @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.CREATE)
@@ -45,7 +46,9 @@ export class AuctionsController {
   }
 
   @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID)
-  placeBId(@Payload() placeBidDto: PlaceBidDto) {
-    return this.auctionsService.placeBid(placeBidDto);
+  async placeBid(@Payload() placeBidDto: PlaceBidDto) {
+    this.logger.log(`Received bid: ${JSON.stringify(placeBidDto)}`);
+    const result = await this.auctionsService.placeBid(placeBidDto);
+    this.logger.log(`Bid result: ${JSON.stringify(result)}`);
   }
 }
