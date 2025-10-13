@@ -1,6 +1,6 @@
 ## Auction app backend leverage NestJS
 
-Leverage Redis and RabbitMQ
+Leverage Redis and RabbitMQ, Websocket / Socket.io
 
 ### Deployment
 
