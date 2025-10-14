@@ -36,3 +36,52 @@ The Auction App is designed to simulate a real-world auction process with a focu
 - **Real-time responsiveness.**
 - **Service decoupling and scalability.**
 - **Cloud-native deployment and orchestration.**
+
+🔁 Data Flow Overview
+
+```js
+[ User (Browser) ]
+        │
+        ▼
+[ React Frontend (Vercel) ]
+        │
+        ▼
+[ API Gateway (NestJS) ]
+        │
+        ├──► Publishes messages to RabbitMQ  (place bid, join auction)
+        │
+        ▼
+[ Auction Service / Bidding Service (NestJS) ]
+        │
+        ├──► Processes bid logic
+        │
+        ├──► Updates MongoDB (in another worker process)
+        │
+        └──► Publishes auction result to Redis channel
+                │
+                ▼
+[ Redis Pub/Sub ]
+        │
+        ▼
+[ WebSocket Server → React Client ]
+        │
+        └──► Sends live auction updates in real time
+
+```
+
+#### 🏗️ Components
+
+- **Frontend (React + Redux):** Renders UI and listens to real-time updates via WebSocket.
+- **Gateway Service:** Entry point for HTTP/WebSocket connections; routes requests and emits events to RabbitMQ.
+- **Auction & Bidding Services:** Handle business logic, validate bids, and update database state.
+- **RabbitMQ:** Ensures asynchronous, reliable message delivery between services.
+- **Redis:** Handles fast real-time broadcasting of auction results to clients.
+- **MongoDB:** Stores user profiles, product listings, and auction history.
+- **GKE:** Orchestrates Dockerized services, providing scalability, fault tolerance, and centralized management.
+
+#### ⚡ Benefits
+
+- **Real-time experience:** Instant feedback for all bidders through WebSocket + Redis Pub/Sub.
+- **Scalability:** Each service can scale independently on Kubernetes.
+- **Fault tolerance:** Message-driven design using RabbitMQ ensures no data loss on transient failures.
+- **Cloud-native deployment:** Configurable via GKE ConfigMaps & Secrets for secure, flexible scaling.
