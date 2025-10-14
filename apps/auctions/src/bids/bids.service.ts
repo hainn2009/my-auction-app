@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBidDto } from './dto/create-bid.dto';
-import { UpdateBidDto } from './dto/update-bid.dto';
 
 @Injectable()
 export class BidsService {
@@ -14,10 +13,6 @@ export class BidsService {
 
   findOne(id: number) {
     return `This action returns a #${id} bid`;
-  }
-
-  update(id: number, updateBidDto: UpdateBidDto) {
-    return `This action updates a #${id} bid`;
   }
 
   remove(id: number) {

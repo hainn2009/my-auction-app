@@ -7,6 +7,7 @@ import { AuctionsAppService } from './auctions-app.service';
 import { AuctionsModule } from './auctions/auctions.module';
 import { BidsModule } from './bids/bids.module';
 import { ItemsModule } from './items/items.module';
+import { DbWorkerModule } from './db-worker/db-worker.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ItemsModule } from './items/items.module';
       }),
       inject: [ConfigService],
     }),
+    DbWorkerModule,
   ],
   controllers: [AuctionsAppController],
   providers: [AuctionsAppService],

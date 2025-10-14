@@ -2,7 +2,6 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BidsService } from './bids.service';
 import { CreateBidDto } from './dto/create-bid.dto';
-import { UpdateBidDto } from './dto/update-bid.dto';
 
 @Controller()
 export class BidsController {
@@ -23,10 +22,10 @@ export class BidsController {
     return this.bidsService.findOne(id);
   }
 
-  @MessagePattern('updateBid')
-  update(@Payload() updateBidDto: UpdateBidDto) {
-    return this.bidsService.update(updateBidDto.id, updateBidDto);
-  }
+  // @MessagePattern('updateBid')
+  // update(@Payload() updateBidDto: UpdateBidDto) {
+  //   return this.bidsService.update(updateBidDto.id, updateBidDto);
+  // }
 
   @MessagePattern('removeBid')
   remove(@Payload() id: number) {

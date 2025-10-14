@@ -1,1 +1,3 @@
-export class CreateBidDto {}
+export class CreateBidDto {
+  _id?: string;
+}

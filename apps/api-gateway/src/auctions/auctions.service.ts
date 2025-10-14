@@ -32,8 +32,7 @@ export class AuctionsService {
   }
 
   placeBid(placeBidDto: PlaceBidDto) {
-    // return firstValueFrom(this.auctionsClient.send<string>(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID, placeBidDto));
-    return firstValueFrom(this.auctionsClient.emit(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID, placeBidDto));
+    return firstValueFrom(this.auctionsClient.send<string>(AUCTIONS_PATTERN.AUCTIONS.PLACE_BID, placeBidDto));
   }
 
   update(updateAuctionDto: UpdateAuctionDto) {

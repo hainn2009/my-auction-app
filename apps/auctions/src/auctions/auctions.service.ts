@@ -1,22 +1,33 @@
-import { CreateAuctionDto, isUser, Product, ProductDocument, UpdateAuctionDto } from '@app/contracts';
+import {
+  AUCTIONS_PATTERN,
+  CreateAuctionDto,
+  isUser,
+  Product,
+  ProductDocument,
+  UpdateAuctionDto,
+  User,
+  UserDocument,
+} from '@app/contracts';
 import { PlaceBidDto } from '@app/contracts/auctions/place-bid.dto';
-import { RedisService } from '@liaoliaots/nestjs-redis';
-import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import Redis from 'ioredis';
+import type { Cache } from 'cache-manager';
 import { Model, Types } from 'mongoose';
+import { AUCTIONS_WRITE_DB_CLIENT, GATEWAY_WEBSOCKET_CLIENT } from './constants';
 
 @Injectable()
 export class AuctionsService {
-  private redisClient: Redis;
+  private readonly logger = new Logger(AuctionsService.name);
 
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    private readonly redisService: RedisService,
-  ) {
-    this.redisClient = this.redisService.getOrThrow();
-  }
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @Inject(AUCTIONS_WRITE_DB_CLIENT) private readonly amqpConnection: ClientProxy,
+    @Inject(GATEWAY_WEBSOCKET_CLIENT) private readonly redisClient: ClientProxy,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
   async create({
     itemName,
     startingPrice,
@@ -162,25 +173,56 @@ export class AuctionsService {
   }
 
   async placeBid({ userId, auctionId: id, bidAmount }: PlaceBidDto) {
-    const product = await this.productModel.findById(id).populate('bids.bidder', 'name');
-    if (!product) return { success: false, errorCode: 'NOT_FOUND', message: 'Auction not found' };
+    // Get product from cache to reduce DB hits
+    const cacheKey = `auction:${id}`;
+    let product: any;
+    const cached = (await this.cacheManager.get(cacheKey)) as string;
 
+    if (cached) {
+      product = JSON.parse(cached);
+    } else {
+      product = await this.productModel.findById(id).populate('bids.bidder', 'name').lean();
+      // product = await this.productModel.findById(id).lean();
+      if (!product) return { success: false, errorCode: 'NOT_FOUND', message: 'Auction not found' };
+      await this.cacheManager.set(cacheKey, JSON.stringify(product));
+    }
+
+    // Validate bid
     if (new Date(product.itemEndDate) < new Date())
       return { success: false, errorCode: 'AUCTION_ENDED', message: 'Auction has already ended' };
 
     const minBid = Math.max(product.currentPrice, product.startingPrice) + 1;
     const maxBid = Math.max(product.currentPrice, product.startingPrice) + 10;
     if (bidAmount < minBid)
-      return { success: false, errorCode: 'BID_TOO_LOW', message: `Bid must be at least Rs ${minBid}` };
+      return { success: false, errorCode: 'BID_TOO_LOW', message: `Bid must be at least ${minBid}` };
     if (bidAmount > maxBid)
-      return { success: false, errorCode: 'BID_TOO_HIGH', message: `Bid must be at max Rs ${maxBid}` };
+      return { success: false, errorCode: 'BID_TOO_HIGH', message: `Bid must be at max ${maxBid}` };
+
+    // Save bid temporarily in cache and persist to DB
     product.bids.push({
       bidder: new Types.ObjectId(userId),
       bidAmount: bidAmount,
     });
-
     product.currentPrice = bidAmount;
-    await product.save();
-    return 'Bid placed successfully';
+
+    // Create event in Redis PubSub for real-time updates
+    const bidUser = await this.userModel.findById(userId).lean();
+    if (!bidUser) return { success: false, errorCode: 'USER_NOT_FOUND', message: 'User not found' };
+    const pubsubPayload = {
+      ...product,
+      // auctionId: id,
+      // currentPrice: product.currentPrice,
+      bidder: { _id: userId, name: bidUser.name },
+      // bidAmount,
+      // timestamp: Date.now(),
+    };
+    await this.redisClient.emit(AUCTIONS_PATTERN.BIDS.BROAD_CAST_BID_RESULT, pubsubPayload);
+
+    // Actually save bid to DB in queue-2
+    await this.amqpConnection.emit(AUCTIONS_PATTERN.AUCTIONS.WRITE_DB, product);
+
+    // Return result to queue-1 (gateway)
+    this.logger.log(`Bid cached & published for auction ${id} (user ${userId})`);
+    return { success: true, message: 'Bid accepted (cached)', data: product };
   }
 }

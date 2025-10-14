@@ -26,7 +26,6 @@ import { UsersModule } from './users/users.module';
         CLOUDINARY_API_KEY: joi.string().required(),
         CLOUDINARY_API_SECRET: joi.string().required(),
         RABBITMQ_URL: joi.string().required(),
-        RABBITMQ_QUEUE: joi.string().required(),
       }),
     }),
     AuctionsModule,

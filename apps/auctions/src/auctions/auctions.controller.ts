@@ -50,5 +50,6 @@ export class AuctionsController {
     this.logger.log(`Received bid: ${JSON.stringify(placeBidDto)}`);
     const result = await this.auctionsService.placeBid(placeBidDto);
     this.logger.log(`Bid result: ${JSON.stringify(result)}`);
+    return result;
   }
 }

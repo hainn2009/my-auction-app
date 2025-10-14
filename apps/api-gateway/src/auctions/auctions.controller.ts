@@ -69,8 +69,13 @@ export class AuctionsController {
   }
 
   @Post(':id')
-  placeBid(@Param('id') id: string, @Body() { bidAmount }: PlaceBidDto, @Req() req: Request) {
-    return this.auctionsService.placeBid({ userId: req.user!.userId, auctionId: id, bidAmount: Number(bidAmount) });
+  async placeBid(@Param('id') id: string, @Body() { bidAmount }: PlaceBidDto, @Req() req: Request) {
+    const result = await this.auctionsService.placeBid({
+      userId: req.user!.userId,
+      auctionId: id,
+      bidAmount: Number(bidAmount),
+    });
+    return result;
   }
 
   @Patch(':id')
