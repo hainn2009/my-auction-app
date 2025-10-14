@@ -1,3 +1,11 @@
 resources:
   - deployment.yaml
   - service.yaml
+
+secretGenerator:
+  - name: rabbitmq-secrets
+    envs:
+      - secret.env
+
+generatorOptions:
+  disableNameSuffixHash: true
