@@ -8,8 +8,8 @@ services:
       - '5672:5672' # AMQP protocol
       - '15672:15672' # management UI
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_ERLANG_COOKIE: 'mysecretcookie'
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
