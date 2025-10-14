@@ -3,11 +3,12 @@ import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketSe
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
+  // config be apply in main.ts
   // cors: { origin: '*' },
-  cors: {
-    origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174'],
-    credentials: true,
-  },
+  // cors: {
+  //   origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174'],
+  //   credentials: true,
+  // },
   namespace: '/auctions',
 })
 @Controller()

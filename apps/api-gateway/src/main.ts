@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ApiGatewayModule } from './api-gateway.module';
+import { SocketIoAdapter } from './common/socket-io.adapter';
 import { TrimStringsPipe } from './common/trim-strings.pipe';
 const cookieParser = require('cookie-parser');
 
@@ -28,6 +29,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Config websocket
+  app.useWebSocketAdapter(new SocketIoAdapter(app, configService));
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.REDIS,
