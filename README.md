@@ -85,3 +85,7 @@ The Auction App is designed to simulate a real-world auction process with a focu
 - **Scalability:** Each service can scale independently on Kubernetes.
 - **Fault tolerance:** Message-driven design using RabbitMQ ensures no data loss on transient failures.
 - **Cloud-native deployment:** Configurable via GKE ConfigMaps & Secrets for secure, flexible scaling.
+
+#### AI Service
+
+This feature is building
