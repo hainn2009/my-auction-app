@@ -88,4 +88,4 @@ The Auction App is designed to simulate a real-world auction process with a focu
 
 #### AI Service
 
-This feature is building. Done but need real data.
+This feature is built. But might need more real data to train it.
