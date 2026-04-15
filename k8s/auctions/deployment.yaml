@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: auctions
-          image: asia-southeast1-docker.pkg.dev/noted-runway-472014-s2/auctions/auctions-service:latest
+          image: auctions-service
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3003
           env:

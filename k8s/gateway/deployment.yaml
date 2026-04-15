@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: asia-southeast1-docker.pkg.dev/noted-runway-472014-s2/auctions/api-gateway:latest
+          image: api-gateway
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:

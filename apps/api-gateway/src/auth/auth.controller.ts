@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -7,6 +7,8 @@ import { GeoLocationService } from './utils/geo-location.service';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly geoLocationService: GeoLocationService,
@@ -31,7 +33,9 @@ export class AuthController {
       });
       return { message: 'User registered successfully' };
     } catch (err) {
-      throw new BadRequestException(err.message || 'Signup failed');
+      this.logger.error('Signup error:', err);
+      const message = err instanceof Error ? err.message : 'Signup failed';
+      throw new BadRequestException(message);
     }
   }
 
@@ -54,7 +58,9 @@ export class AuthController {
 
       return { message: 'Login Successful' };
     } catch (err) {
-      throw new BadRequestException(err.message || 'Login failed');
+      this.logger.error('Login error:', err);
+      const message = err instanceof Error ? err.message : 'Login failed';
+      throw new BadRequestException(message);
     }
   }
 
