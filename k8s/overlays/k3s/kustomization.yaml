@@ -1,0 +1,74 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../gateway
+  - ../../users
+  - ../../auctions
+  - ../../rabbitmq
+  - ../../redis
+
+# For EC2 + k3s
+images:
+  - name: api-gateway
+    newName: api-gateway
+    newTag: latest
+  - name: users-service
+    newName: users-service
+    newTag: latest
+  - name: auctions-service
+    newName: auctions-service
+    newTag: latest
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: api-gateway
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: users
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+    target:
+      kind: Deployment
+      name: auctions
+  - patch: |-
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+    target:
+      kind: Service
+      name: api-gateway
+  - patch: |-
+      - op: replace
+        path: /spec/ingressClassName
+        value: traefik
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: api.<your-domain>
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.<your-domain>
+    target:
+      kind: Ingress
+      name: api-gateway-ingress
+  - patch: |-
+      - op: replace
+        path: /spec/acme/email
+        value: <your-email@example.com>
+      - op: replace
+        path: /spec/acme/solvers/0/http01/ingress/class
+        value: traefik
+    target:
+      kind: ClusterIssuer
+      name: letsencrypt

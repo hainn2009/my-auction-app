@@ -1,31 +1,141 @@
 services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
   rabbitmq:
     image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    hostname: rabbitmq
     restart: unless-stopped
     ports:
-      - '5672:5672' # AMQP protocol
-      - '15672:15672' # management UI
+      - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-      RABBITMQ_ERLANG_COOKIE: 'mysecretcookie'
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-password}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-mysecretcookie}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - auction-net
-  redis:
-    image: redis:7
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: users
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      GATEWAY_PORT: ${GATEWAY_PORT:-4000}
+      USERS_HOST: users
+      USERS_PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MONGODB_URI: mongodb://mongo:27017/auction-system
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  auctions:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: auctions
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      GATEWAY_PORT: ${GATEWAY_PORT:-4000}
+      USERS_HOST: users
+      USERS_PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MONGODB_URI: mongodb://mongo:27017/auction-system
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: api-gateway
     restart: unless-stopped
     ports:
-      - '6379:6379'
-    networks:
-      - auction-net
+      - "${GATEWAY_PORT:-4000}:${GATEWAY_PORT:-4000}"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      GATEWAY_PORT: ${GATEWAY_PORT:-4000}
+      USERS_HOST: users
+      USERS_PORT: 3001
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MONGODB_URI: mongodb://mongo:27017/auction-system
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      users:
+        condition: service_started
+      auctions:
+        condition: service_started
 
 volumes:
+  mongo_data:
   rabbitmq_data:
-
-networks:
-  auction-net:
-    driver: bridge

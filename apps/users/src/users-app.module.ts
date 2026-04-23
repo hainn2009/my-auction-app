@@ -12,7 +12,6 @@ import { UsersModule } from './users/users.module';
       validationSchema: joi.object({
         // AUCTION_HOST: joi.string().default('localhost'),
         // AUCTION_PORT: joi.number().default(3003),
-        // BOOKS_CLIENT_PORT: joi.number().default(3002),
         MONGODB_URI: joi.string().required(),
       }),
     }),

@@ -1,118 +1,125 @@
 # Kubernetes Deployment Guide
 
-This project uses **Kustomize** to manage different environments (Minikube local, Dev, GKE Production) with a single configuration change.
+This project uses Kustomize to manage multiple environments with one deploy structure:
+Minikube, Dev, GKE Production, EKS Production, and EC2 + k3s.
 
-## 📁 Structure
+## Structure
 
-```
+```text
 k8s/
-├── base/                    # Base templates (reference only)
-│   ├── deployment.yaml     # Generic deployment template
-│   ├── service.yaml        # Generic service template
-│   └── kustomization.yaml
-├── gateway/                 # API Gateway service
-│   ├── deployment.yaml     # Uses generic image: api-gateway
-│   ├── service.yaml
-│   └── kustomization.yaml
-├── users/                   # Users service
-│   ├── deployment.yaml     # Uses generic image: users-service
-│   ├── service.yaml
-│   └── kustomization.yaml
-├── auctions/                # Auctions service
-│   ├── deployment.yaml     # Uses generic image: auctions-service
-│   ├── service.yaml
-│   └── kustomization.yaml
-├── rabbitmq/                # RabbitMQ infrastructure
-├── redis/                   # Redis cache
-├── overlays/
-│   ├── minikube/           # Local Minikube environment
-│   ├── dev/                # Dev environment
-│   └── prod/               # GKE Production environment
-└── kustomization.yaml      # Root kustomization (legacy)
+|-- gateway/                 # API Gateway service
+|-- users/                   # Users service
+|-- auctions/                # Auctions service
+|-- rabbitmq/                # RabbitMQ infrastructure
+|-- redis/                   # Redis cache
+|-- overlays/
+|   |-- minikube/            # Local Minikube environment
+|   |-- dev/                 # Dev environment
+|   |-- prod/                # GKE Production environment
+|   |-- eks/                 # EKS Production environment
+|   `-- k3s/                 # EC2 + k3s environment
+`-- kustomization.yaml       # Root kustomization (legacy)
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
-### For Minikube (Local Development)
+### Minikube
 
 ```bash
-# 1. Start Minikube
 minikube start
-
-# 2. Build Docker images inside Minikube
 eval $(minikube docker-env)
 docker build -t api-gateway:latest -f apps/gateway/Dockerfile .
 docker build -t users-service:latest -f apps/users/Dockerfile .
 docker build -t auctions-service:latest -f apps/auctions/Dockerfile .
-
-# 3. Deploy to Minikube
 kubectl apply -k k8s/overlays/minikube
 ```
 
-### For GKE (Production)
+### GKE
 
 ```bash
-# 1. Connect to GKE cluster
 gcloud container clusters get-credentials your-cluster --region asia-southeast1
-
-# 2. Deploy to GKE (uses GCR images)
 kubectl apply -k k8s/overlays/prod
 ```
 
-## 🔧 Environment Configuration
+### EKS
 
-### Key Differences
+```bash
+aws eks update-kubeconfig --region <your-region> --name <your-cluster-name>
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/aws/deploy.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+kubectl apply -k k8s/overlays/eks
+```
+
+### EC2 + k3s
+
+```bash
+curl -sfL https://get.k3s.io | sh -
+sudo k3s kubectl get nodes
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+kubectl apply -k k8s/overlays/k3s
+```
+
+## Environment Notes
 
 | Environment | Registry | imagePullPolicy | Use Case |
 |-------------|----------|-----------------|----------|
-| **Minikube** | Local (Never pull) | `Never` | Local development |
-| **Dev** | dev-registry/* | `IfNotPresent` | Docker Desktop/Dev cluster |
-| **Prod** | GCR/GAR | `Always` | GKE Production |
+| Minikube | Local image | `Never` | Local development |
+| Dev | `dev-registry/*` | `IfNotPresent` | Docker Desktop / dev cluster |
+| Prod | GCR / GAR | `Always` | GKE Production |
+| EKS | AWS ECR | `Always` | EKS Production |
+| k3s | Local registry or image tar load | `IfNotPresent` | Single-node EC2 |
 
-### Changing Registry for Your GCP Project
+## EC2 + k3s Setup
 
-Edit `k8s/overlays/prod/kustomization.yaml`:
+The k3s overlay expects:
+- k3s is already installed on the EC2 instance
+- the built-in Traefik ingress controller is available
+- cert-manager is installed
+- a real domain name for the API Gateway ingress
+- a real email address for Let's Encrypt registration
 
-```yaml
-images:
-  - name: api-gateway
-    newName: <YOUR_REGION>-docker.pkg.dev/<YOUR_PROJECT>/<YOUR_REPO>/api-gateway
-    newTag: latest
-```
+Update `k8s/overlays/k3s/kustomization.yaml` with:
+- `<your-domain>`
+- `<your-email@example.com>`
 
-## 📝 Deployment Commands
+If you build the images on the EC2 node, the names are just:
+- `api-gateway:latest`
+- `users-service:latest`
+- `auctions-service:latest`
+
+Example build commands on the EC2 host:
 
 ```bash
-# View what will be applied (dry run)
+docker build -t api-gateway:latest -f apps/gateway/Dockerfile .
+docker build -t users-service:latest -f apps/users/Dockerfile .
+docker build -t auctions-service:latest -f apps/auctions/Dockerfile .
+```
+
+If you want to load tarballs into the node, you can use:
+
+```bash
+docker save api-gateway:latest | gzip > api-gateway.tar.gz
+docker save users-service:latest | gzip > users-service.tar.gz
+docker save auctions-service:latest | gzip > auctions-service.tar.gz
+sudo k3s ctr images import api-gateway.tar.gz
+sudo k3s ctr images import users-service.tar.gz
+sudo k3s ctr images import auctions-service.tar.gz
+```
+
+## Deployment Commands
+
+```bash
 kubectl kustomize k8s/overlays/minikube
-
-# Apply configuration
 kubectl apply -k k8s/overlays/<environment>
-
-# Delete configuration
 kubectl delete -k k8s/overlays/<environment>
-
-# Check deployment status
 kubectl get deployments
 kubectl get pods
 ```
 
-## 🔄 Making Changes
+## Secrets
 
-1. **Base changes** (apply to all environments):
-   - Edit files in `k8s/base/` or service folders
+Create secrets before deploying:
 
-2. **Environment-specific changes**:
-   - Edit the corresponding overlay in `k8s/overlays/<env>/`
-
-3. **Change environment**:
-   - Simply switch the overlay path: `minikube` → `prod`
-
-## 💡 Tips
-
-- **Minikube**: Always use `imagePullPolicy: Never` so it uses local images
-- **GKE**: Use `imagePullPolicy: Always` to always pull latest images
-- **Secrets**: Make sure to create secrets before deploying:
-  ```bash
-  kubectl create secret generic api-gateway-secrets --from-env-file=k8s/gateway/secret.env
-  ```
+```bash
+kubectl create secret generic api-gateway-secrets --from-env-file=k8s/gateway/secret.env
+```

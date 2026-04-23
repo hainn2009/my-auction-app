@@ -1,9 +1,38 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { GeoLocationService } from './utils/geo-location.service';
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (typeof err === 'string') {
+    return err;
+  }
+
+  if (err && typeof err === 'object') {
+    const maybeMessage = (err as { message?: unknown; error?: unknown }).message;
+    if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
+      return maybeMessage;
+    }
+
+    const nestedError = (err as { error?: unknown }).error;
+    if (typeof nestedError === 'string' && nestedError.trim()) {
+      return nestedError;
+    }
+
+    if (
+      nestedError &&
+      typeof nestedError === 'object' &&
+      'message' in nestedError &&
+      typeof (nestedError as { message?: unknown }).message === 'string'
+    ) {
+      return (nestedError as { message: string }).message;
+    }
+  }
+
+  return fallback;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -34,8 +63,11 @@ export class AuthController {
       return { message: 'User registered successfully' };
     } catch (err) {
       this.logger.error('Signup error:', err);
-      const message = err instanceof Error ? err.message : 'Signup failed';
-      throw new BadRequestException(message);
+      const message = getErrorMessage(err, 'Signup failed');
+      if (message.toLowerCase().includes('already exists')) {
+        throw new ConflictException({ error: message });
+      }
+      throw new BadRequestException({ error: message });
     }
   }
 
@@ -59,8 +91,8 @@ export class AuthController {
       return { message: 'Login Successful' };
     } catch (err) {
       this.logger.error('Login error:', err);
-      const message = err instanceof Error ? err.message : 'Login failed';
-      throw new BadRequestException(message);
+      const message = getErrorMessage(err, 'Login failed');
+      throw new BadRequestException({ error: message });
     }
   }
 
