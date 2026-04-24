@@ -1,9 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY . .
+COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci --no-audit --no-fund
+
+COPY . .
 
 ARG APP_NAME
 RUN npm run build ${APP_NAME}
