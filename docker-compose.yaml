@@ -1,20 +1,10 @@
 services:
-  mongo:
-    image: mongo:7
-    restart: unless-stopped
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--host", "127.0.0.1", "--port", "27017", "--eval", "quit(db.adminCommand({ ping: 1 }).ok ? 0 : 1)"]
-      interval: 10s
-      timeout: 15s
-      retries: 20
-      start_period: 60s
-
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    mem_limit: 80m
+    memswap_limit: 80m
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -22,14 +12,15 @@ services:
       retries: 10
 
   rabbitmq:
-    image: rabbitmq:3.13-management
+    image: rabbitmq:3.13-alpine
     restart: unless-stopped
-    ports:
-      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-user}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-password}
       RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-mysecretcookie}
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.15"
+    mem_limit: 150m
+    memswap_limit: 150m
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -46,25 +37,26 @@ services:
       args:
         APP_NAME: users
     restart: unless-stopped
+    mem_limit: 180m
+    memswap_limit: 180m
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
+      NODE_OPTIONS: "--max-old-space-size=128"
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      MONGODB_URI: mongodb://mongo:27017/auction-system
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
-      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      MONGODB_URI: ${MONGODB_URI}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
       JWT_SECRET: ${JWT_SECRET:-dev-secret}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
     depends_on:
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
@@ -75,25 +67,26 @@ services:
       args:
         APP_NAME: auctions
     restart: unless-stopped
+    mem_limit: 180m
+    memswap_limit: 180m
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
+      NODE_OPTIONS: "--max-old-space-size=128"
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      MONGODB_URI: mongodb://mongo:27017/auction-system
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
-      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      MONGODB_URI: ${MONGODB_URI}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
       JWT_SECRET: ${JWT_SECRET:-dev-secret}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
     depends_on:
-      mongo:
-        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
@@ -108,25 +101,26 @@ services:
     restart: unless-stopped
     ports:
       - "${GATEWAY_PORT:-4000}:${GATEWAY_PORT:-4000}"
+    mem_limit: 220m
+    memswap_limit: 220m
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
+      NODE_OPTIONS: "--max-old-space-size=160"
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      MONGODB_URI: mongodb://mongo:27017/auction-system
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
-      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-false}
+      MONGODB_URI: ${MONGODB_URI}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
+      RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-demo}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-demo}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-demo}
       JWT_SECRET: ${JWT_SECRET:-dev-secret}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
     depends_on:
-      mongo:
-        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
@@ -137,5 +131,4 @@ services:
         condition: service_started
 
 volumes:
-  mongo_data:
   rabbitmq_data:
