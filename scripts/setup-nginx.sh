@@ -32,3 +32,5 @@ sudo certbot renew --dry-run
 
 echo ""
 echo "Done! Truy cập: https://$DOMAIN"
+echo ""
+echo "Để start app: docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d"

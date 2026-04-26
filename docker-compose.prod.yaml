@@ -1,0 +1,20 @@
+services:
+  redis:
+    mem_limit: 80m
+    memswap_limit: 80m
+
+  rabbitmq:
+    mem_limit: 256m
+    memswap_limit: 256m
+
+  users:
+    mem_limit: 150m
+    memswap_limit: 150m
+
+  auctions:
+    mem_limit: 150m
+    memswap_limit: 150m
+
+  api-gateway:
+    mem_limit: 180m
+    memswap_limit: 180m
