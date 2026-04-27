@@ -1,20 +1,28 @@
 services:
-  redis:
-    mem_limit: 70m
-    memswap_limit: 70m
-
-  rabbitmq:
-    mem_limit: 200m
-    memswap_limit: 200m
+  # redis and rabbitmq mem_limits removed — these containers are no longer used in cloud mode.
+  # To run with local containers instead (rollback): docker-compose --profile local -f docker-compose.yaml -f docker-compose.prod.yaml up
+  #
+  # e2-micro 1GB budget:
+  #   OS + Docker daemon  ~280MB
+  #   Buffer (OOM safety) ~150MB
+  #   Available           ~594MB  →  3 containers capped at 550MB total
+  #
+  # NODE_OPTIONS heap = ~70% of mem_limit (để lại room cho non-heap: buffers, native modules)
 
   users:
-    mem_limit: 120m
-    memswap_limit: 120m
-
-  auctions:
-    mem_limit: 120m
-    memswap_limit: 120m
-
-  api-gateway:
     mem_limit: 150m
     memswap_limit: 150m
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=110"
+
+  auctions:
+    mem_limit: 175m
+    memswap_limit: 175m
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=130"
+
+  api-gateway:
+    mem_limit: 225m
+    memswap_limit: 225m
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=165"

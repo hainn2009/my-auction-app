@@ -1,5 +1,9 @@
 services:
+  # --- Local infrastructure (profile: local) ---
+  # Cloud mode  : docker-compose up               (uses Upstash + CloudAMQP via .env)
+  # Rollback    : docker-compose --profile local up (spins up Redis + RabbitMQ containers)
   redis:
+    profiles: [local]
     image: redis:7-alpine
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
@@ -10,6 +14,7 @@ services:
       retries: 10
 
   rabbitmq:
+    profiles: [local]
     image: rabbitmq:3.13-alpine
     restart: unless-stopped
     environment:
@@ -40,8 +45,9 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: ${REDIS_URL:-}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       MONGODB_URI: ${MONGODB_URI}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
       RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
@@ -53,8 +59,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+        required: false
       rabbitmq:
         condition: service_healthy
+        required: false
 
   auctions:
     build:
@@ -70,8 +78,9 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: ${REDIS_URL:-}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       MONGODB_URI: ${MONGODB_URI}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
       RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
@@ -83,8 +92,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+        required: false
       rabbitmq:
         condition: service_healthy
+        required: false
 
   api-gateway:
     build:
@@ -102,8 +113,9 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: ${REDIS_URL:-}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
       MONGODB_URI: ${MONGODB_URI}
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://user:password@rabbitmq:5672}
       RABBITMQ_QUEUE_DURABLE: ${RABBITMQ_QUEUE_DURABLE:-true}
@@ -115,8 +127,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+        required: false
       rabbitmq:
         condition: service_healthy
+        required: false
       users:
         condition: service_started
       auctions:

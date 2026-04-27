@@ -9,6 +9,24 @@ import { AuctionsController } from './auctions.controller';
 import { AuctionsService } from './auctions.service';
 import { AUCTIONS_WRITE_DB_CLIENT, GATEWAY_WEBSOCKET_CLIENT } from './constants';
 
+// REDIS_URL (Upstash) takes priority; falls back to REDIS_HOST + REDIS_PORT (local container)
+function resolveRedisOptions(config: ConfigService) {
+  const url = config.get<string>('REDIS_URL');
+  if (url) {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port || '6379'),
+      ...(parsed.password && { password: decodeURIComponent(parsed.password) }),
+      ...(parsed.protocol === 'rediss:' && { tls: {} }),
+    };
+  }
+  return {
+    host: config.get<string>('REDIS_HOST'),
+    port: config.get<number>('REDIS_PORT'),
+  };
+}
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,7 +38,10 @@ import { AUCTIONS_WRITE_DB_CLIENT, GATEWAY_WEBSOCKET_CLIENT } from './constants'
       inject: [ConfigService],
       isGlobal: true,
       useFactory: async (configService: ConfigService) => ({
-        store: new KeyvRedis(`redis://${configService.get('REDIS_HOST')}:${configService.get('REDIS_PORT')}`),
+        store: new KeyvRedis(
+          configService.get<string>('REDIS_URL') ||
+          `redis://${configService.get('REDIS_HOST')}:${configService.get('REDIS_PORT')}`,
+        ),
         ttl: 60 * 1000, // 10 minute
       }),
     }),
@@ -31,10 +52,7 @@ import { AUCTIONS_WRITE_DB_CLIENT, GATEWAY_WEBSOCKET_CLIENT } from './constants'
         name: GATEWAY_WEBSOCKET_CLIENT,
         useFactory: (config: ConfigService) => ({
           transport: Transport.REDIS,
-          options: {
-            host: config.get<string>('REDIS_HOST'),
-            port: config.get<number>('REDIS_PORT'),
-          },
+          options: resolveRedisOptions(config),
         }),
       },
     ]),
