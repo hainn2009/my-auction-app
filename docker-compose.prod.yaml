@@ -21,6 +21,10 @@ services:
     environment:
       NODE_OPTIONS: "--max-old-space-size=130"
 
+  ai-service:
+    mem_limit: 180m
+    memswap_limit: 180m
+
   api-gateway:
     mem_limit: 225m
     memswap_limit: 225m

@@ -97,6 +97,16 @@ services:
         condition: service_healthy
         required: false
 
+  ai-service:
+    build:
+      context: ../ai-services
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${AI_SERVICE_PORT:-8000}:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+
   api-gateway:
     build:
       context: .
@@ -113,6 +123,7 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT:-4000}
       USERS_HOST: users
       USERS_PORT: 3001
+      AI_SERVICE_URL: http://ai-service:8000
       REDIS_URL: ${REDIS_URL:-}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
