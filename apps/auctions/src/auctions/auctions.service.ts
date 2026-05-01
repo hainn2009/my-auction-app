@@ -1,6 +1,7 @@
 import {
   AUCTIONS_PATTERN,
   CreateAuctionDto,
+  AnalyticsAuctionDto,
   isUser,
   Product,
   ProductDocument,
@@ -150,6 +151,34 @@ export class AuctionsService {
     }));
 
     return { totalAuctions, userAuctionCount, activeAuctions, latestAuctions, latestUserAuctions };
+  }
+
+  async getAnalyticsData(): Promise<AnalyticsAuctionDto[]> {
+    const auctions = await this.productModel
+      .find()
+      .populate('seller', 'name')
+      .populate('bids.bidder', 'name')
+      .select('itemName itemCategory startingPrice currentPrice itemStartDate itemEndDate seller bids')
+      .sort({ createdAt: -1 });
+
+    return auctions.map((auction) => ({
+      auctionId: auction._id.toString(),
+      itemName: auction.itemName,
+      itemCategory: auction.itemCategory,
+      startingPrice: auction.startingPrice,
+      currentPrice: auction.currentPrice,
+      itemStartDate: auction.itemStartDate,
+      itemEndDate: auction.itemEndDate,
+      sellerId: isUser(auction.seller) ? auction.seller._id.toString() : String(auction.seller),
+      bids: auction.bids.map((bid) => ({
+        bidderId:
+          bid.bidder && typeof bid.bidder === 'object' && '_id' in bid.bidder
+            ? bid.bidder._id.toString()
+            : String(bid.bidder),
+        amount: bid.bidAmount,
+        bidTime: bid.bidTime,
+      })),
+    }));
   }
 
   async getMyAuctions(userId: string) {

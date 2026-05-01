@@ -40,6 +40,11 @@ export class AuctionsController {
     return this.auctionsService.getStats(userId);
   }
 
+  @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.REPORT_DATA)
+  getAnalyticsData() {
+    return this.auctionsService.getAnalyticsData();
+  }
+
   @MessagePattern(AUCTIONS_PATTERN.AUCTIONS.MY_AUCTIONS)
   getMyAuctions(@Payload() { userId }: GetStatsDto) {
     return this.auctionsService.getMyAuctions(userId);

@@ -6,6 +6,7 @@ export const AUCTIONS_PATTERN = {
     UPDATE: 'auctions.auctions.update',
     REMOVE: 'auctions.auctions.remove',
     STATS: 'auctions.auctions.stats',
+    REPORT_DATA: 'auctions.auctions.reportData',
     MY_AUCTIONS: 'auctions.auctions.myAuctions',
     PLACE_BID: 'auctions.auctions.placeBid',
     WRITE_DB: 'auctions.auctions.writeDb',

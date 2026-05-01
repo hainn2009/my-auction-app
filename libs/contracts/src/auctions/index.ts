@@ -1,4 +1,6 @@
 export * from './auction.dto';
+export * from './analytics-report.dto';
+export * from './analytics-source.dto';
 export * from './auctions.pattern';
 export * from './create-auction-response.dto';
 export * from './create-auction.dto';

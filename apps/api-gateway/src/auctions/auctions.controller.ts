@@ -58,6 +58,16 @@ export class AuctionsController {
     return this.auctionsService.getStats(req.user!.userId);
   }
 
+  @Get('analytics')
+  getAnalyticsReport() {
+    return this.auctionsService.getAnalyticsReport();
+  }
+
+  @Get('analytics/health')
+  getAnalyticsHealth() {
+    return this.auctionsService.getAnalyticsHealth();
+  }
+
   @Get('my-auctions')
   getMyAuctions(@Req() req: Request) {
     return this.auctionsService.getMyAuctions(req.user!.userId);

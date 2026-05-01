@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { AUCTIONS_QUEUE } from '@app/contracts';
 import { AuthModule } from '@app/contracts/auth/auth.module';
 import { Module } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { AuctionsService } from './auctions.service';
 @Module({
   imports: [
     AuthModule,
+    HttpModule,
     CloudinaryModule.forRootAsync(),
     ClientsModule.registerAsync([
       {

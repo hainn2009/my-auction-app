@@ -89,3 +89,22 @@ The Auction App is designed to simulate a real-world auction process with a focu
 #### AI Service
 
 This feature is built. But might need more real data to train it.
+
+#### AI Analytics Integration
+
+- The gateway exposes `GET /auction/analytics`.
+- The gateway calls the Python AI service at `AI_SERVICE_URL` and sends raw auction data for reporting.
+- If the AI service is down or times out, the gateway returns a fallback analytics report built from the current auction data, so the rest of the system still works.
+
+#### Local Docker
+
+- `docker compose up --build` starts `users`, `auctions`, `api-gateway`, and `ai-service`.
+- `docker compose --profile local up --build` also starts local `redis` and `rabbitmq`.
+- The gateway talks to AI-service through the internal Docker DNS name `http://ai-service:8000`.
+
+#### Environment
+
+Use `.env.example` as a starting point for local development.
+
+- `AI_SERVICE_URL` should point to the Python service.
+- If you do not set it, the gateway defaults to `http://localhost:8000`.
